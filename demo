@@ -1,0 +1,1 @@
+CUDA_VISIBLE_DEVICES=0 python demo.py experiments/seg_detector/ic15_hrnet32_thre.yaml --image_path datasets/icdar2015/test_images/img_279.jpg --resume /home/math-tr/jzy/DB/models/ic15_HRNet32   --box_thresh 0.5 --visualize

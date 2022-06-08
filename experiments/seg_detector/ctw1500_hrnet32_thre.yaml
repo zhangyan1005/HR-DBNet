@@ -1,0 +1,76 @@
+import:
+    - 'experiments/seg_detector/base_ctw1500.yaml'
+package: []
+define:
+  - name: 'Experiment'
+    class: Experiment
+    structure:
+        class: Structure
+        builder:
+            class: Builder
+            model: SegDetectorModel
+            model_args:
+                backbone: hrnet32
+                decoder: SegHRDetector
+                decoder_args:
+                    adaptive: True
+                    in_channels: [64, 128, 256, 512]
+                    k: 50
+                loss_class: L1BalanceCELoss
+        representer:
+            class: SegDetectorRepresenter
+            max_candidates: 1000
+        measurer:
+            class: QuadMeasurer
+        visualizer:
+            class: SegDetectorVisualizer
+    train:
+        class: TrainSettings
+        data_loader:
+            class: DataLoader
+            dataset: ^train_data
+            batch_size: 4
+            num_workers: 16 #0 #16
+        checkpoint:
+            class: Checkpoint
+            start_epoch: 0
+            start_iter: 0
+            resume: null #/home/xiashangzi2/Desktop/DB/outputs/workspace/DB/SegDetectorModel-seg_detector/hrnet18/L1BalanceCELoss/model/model_epoch_864_minibatch_216000 #/home/xiashangzi2/Desktop/DB/models/total_hrnet18_smu_mask_1 #null #/home/xiashangzi2/Desktop/DB/outputs/workspace/DB/SegDetectorModel-seg_detector/hrnet18/L1BalanceCELoss/model/model_epoch_57_minibatch_18000
+        model_saver:
+            class: ModelSaver
+            dir_path: model
+            save_interval: 18000
+            signal_path: save
+        scheduler:
+            class: OptimizerScheduler
+            optimizer: "SGD"
+            optimizer_args:
+                lr: 0.007
+                momentum: 0.9
+                weight_decay: 0.0001
+            learning_rate:
+                class: DecayLearningRate
+                epochs: 1200 # 1200
+        epochs: 1200 # 1200
+
+    validation: &validate
+        class: ValidationSettings
+        data_loaders:
+            icdar2015:
+                class: DataLoader
+                dataset: ^validate_data
+                batch_size: 1
+                num_workers: 16
+                collect_fn:
+                    class: ICDARCollectFN
+        visualize: false
+        interval: 4500
+        exempt: 1
+
+    logger:
+        class: Logger
+        verbose: true
+        level: info
+        log_interval: 450
+
+    evaluation: *validate
